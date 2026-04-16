@@ -1,26 +1,292 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: 0 0% 100%;
+  --foreground: 0 0% 3.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 3.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 3.9%;
+  --primary: 0 0% 9%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 0 0% 96.1%;
+  --secondary-foreground: 0 0% 9%;
+  --muted: 0 0% 96.1%;
+  --muted-foreground: 0 0% 45.1%;
+  --accent: 0 0% 96.1%;
+  --accent-foreground: 0 0% 9%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 0 0% 89.8%;
+  --input: 0 0% 89.8%;
+  --ring: 0 0% 3.9%;
+  --radius: 0.5rem;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
   font-family: Arial, Helvetica, sans-serif;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(239, 68, 68, 0.5); }
+  50% { box-shadow: 0 0 40px rgba(239, 68, 68, 0.8), 0 0 60px rgba(251, 146, 60, 0.6); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+@keyframes bounce-in {
+  0% { transform: scale(0.3); opacity: 0; }
+  50% { transform: scale(1.05); }
+  70% { transform: scale(0.9); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes winner-celebration {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  25% { transform: scale(1.1) rotate(-5deg); }
+  75% { transform: scale(1.1) rotate(5deg); }
+}
+
+@keyframes confetti {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+@keyframes neon-pulse {
+  0%, 100% { 
+    box-shadow: 0 0 5px #6600cc, 0 0 10px #6600cc, 0 0 20px #6600cc, 0 0 40px #6600cc;
+  }
+  50% { 
+    box-shadow: 0 0 10px #6600cc, 0 0 20px #6600cc, 0 0 40px #6600cc, 0 0 80px #6600cc, 0 0 120px #6600cc;
+  }
+}
+
+@keyframes glitch {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(-2px, -2px); }
+  60% { transform: translate(2px, 2px); }
+  80% { transform: translate(2px, -2px); }
+  100% { transform: translate(0); }
+}
+
+@keyframes scan-line {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-neon-pulse {
+  animation: neon-pulse 2s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+}
+
+.animate-bounce-in {
+  animation: bounce-in 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.animate-slide-up {
+  animation: slide-up 0.5s ease-out;
+}
+
+.animate-winner {
+  animation: winner-celebration 0.8s ease-in-out;
+}
+
+.animate-glitch {
+  animation: glitch 0.3s infinite;
+}
+
+.hexagon-clip {
+  clip-path: polygon(30% 0%, 70% 0%, 100% 50%, 70% 100%, 30% 100%, 0% 50%);
+}
+
+.text-neon-purple {
+  color: #6600cc;
+  text-shadow: 0 0 10px #6600cc, 0 0 20px #6600cc, 0 0 30px #6600cc;
+}
+
+.text-neon-cyan {
+  color: #00d9ff;
+  text-shadow: 0 0 10px #00d9ff, 0 0 20px #00d9ff, 0 0 30px #00d9ff;
+}
+
+.bg-esports-dark {
+  background: linear-gradient(135deg, #0f1923 0%, #1a1f2e 50%, #0f1923 100%);
+}
+
+.border-neon-purple {
+  border-color: #6600cc;
+  box-shadow: 0 0 10px rgba(102, 0, 204, 0.5);
+}
+
+.border-neon-cyan {
+  border-color: #00d9ff;
+  box-shadow: 0 0 10px rgba(0, 217, 255, 0.5);
+}
+
+.bracket-line {
+  position: relative;
+}
+
+.bracket-line::after {
+  content: '';
+  position: absolute;
+  right: -20px;
+  top: 50%;
+  width: 20px;
+  height: 2px;
+  background: linear-gradient(90deg, #6600cc, transparent);
+}
+
+.bracket-connector {
+  position: relative;
+}
+
+.bracket-connector::before {
+  content: '';
+  position: absolute;
+  left: -20px;
+  top: 50%;
+  width: 20px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #6600cc);
+}
+
+/* ========== EASTER EGG: HACKED MODE ========== */
+@keyframes hacked-scanline {
+  0% { transform: translateY(-100vh); }
+  100% { transform: translateY(100vh); }
+}
+
+@keyframes hacked-flicker {
+  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
+  20%, 24%, 55% { opacity: 0.4; }
+}
+
+@keyframes hacked-skew {
+  0% { transform: skew(0deg); }
+  20% { transform: skew(-2deg); }
+  40% { transform: skew(1deg); }
+  60% { transform: skew(-1deg); }
+  80% { transform: skew(2deg); }
+  100% { transform: skew(0deg); }
+}
+
+@keyframes hacked-color-cycle {
+  0% { filter: hue-rotate(0deg); }
+  25% { filter: hue-rotate(90deg); }
+  50% { filter: hue-rotate(180deg); }
+  75% { filter: hue-rotate(270deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+
+.hacked-mode {
+  animation: hacked-skew 0.5s infinite, hacked-color-cycle 3s linear infinite;
+}
+
+.hacked-mode * {
+  animation-duration: 0.3s !important;
+}
+
+.hacked-mode::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: rgba(0, 255, 0, 0.8);
+  z-index: 100;
+  animation: hacked-scanline 2s linear infinite;
+  pointer-events: none;
+}
+
+.hacked-mode h1, .hacked-mode h2, .hacked-mode h3 {
+  animation: hacked-flicker 0.5s infinite !important;
+}
+
+.hacked-mode .text-neon-cyan {
+  color: #ff0000 !important;
+  text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000 !important;
+}
+
+.hacked-mode .text-neon-purple {
+  color: #00ff00 !important;
+  text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00 !important;
 }
