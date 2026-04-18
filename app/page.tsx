@@ -6,6 +6,7 @@ import { TournamentBracket } from '@/components/tournament-bracket';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Trophy, Swords } from 'lucide-react';
+import { Roulette } from '@/components/roulette';
 import { Tournament } from '@/lib/types';
 import { playGenerate, playReset, playHack, playClick } from '@/lib/sounds';
 
@@ -245,6 +246,10 @@ export default function Home() {
                     </p>
                   </div>
                   
+                  <div className="border-t border-[#6600cc]/20 pt-6">
+                    <Roulette />
+                  </div>
+
                   <Button 
                     onClick={handleResetTournament} 
                     disabled={loading}
