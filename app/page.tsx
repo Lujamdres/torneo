@@ -7,8 +7,9 @@ import { Matchups } from '@/components/matchups';
 import { PWARegister } from '@/components/pwa-register';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Trophy, WifiOff, ImagePlus, Pencil, Check, X } from 'lucide-react';
+import { Trophy, WifiOff, ImagePlus, Pencil, Check, X, Crown } from 'lucide-react';
 import { Roulette } from '@/components/roulette';
+import { PodiumModal } from '@/components/podium-modal';
 import { Team, Matchup } from '@/lib/types';
 import { getTeams, resetPoints, isOffline, getSettings, saveSetting } from '@/lib/store';
 import { playReset, playHack, playWin, playClick } from '@/lib/sounds';
@@ -67,6 +68,7 @@ export default function Home() {
   const [titleDraft, setTitleDraft] = useState('LIGA');
   const [logo, setLogo] = useState<string | null>(null);
   const [logo2, setLogo2] = useState<string | null>(null);
+  const [podiumOpen, setPodiumOpen] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const logo2InputRef = useRef<HTMLInputElement>(null);
 
@@ -364,6 +366,16 @@ export default function Home() {
               </div>
 
               <Button
+                onClick={() => { setPodiumOpen(true); playWin(); }}
+                disabled={teams.length === 0}
+                className="w-full border-2 border-[#F49117] bg-[#F49117] hover:bg-[#F49117]/90 text-[#73030C] font-black uppercase tracking-wider shadow-lg shadow-[#F49117]/30"
+                size="lg"
+              >
+                <Crown className="h-5 w-5 mr-2" />
+                Nombrar Ganador
+              </Button>
+
+              <Button
                 onClick={handleResetPoints}
                 disabled={loading}
                 className="w-full border-2 border-[#73030C] bg-transparent hover:bg-[#73030C]/10 text-[#73030C] font-black uppercase tracking-wider"
@@ -389,6 +401,14 @@ export default function Home() {
 
         <StandingsTable teams={teams} onTeamsChange={fetchTeams} />
       </div>
+
+      <PodiumModal
+        open={podiumOpen}
+        onOpenChange={setPodiumOpen}
+        firstPlace={[...teams].sort((a, b) => b.points - a.points)[0] ?? null}
+        secondPlace={[...teams].sort((a, b) => b.points - a.points)[1] ?? null}
+        thirdPlace={[...teams].sort((a, b) => b.points - a.points)[2] ?? null}
+      />
     </div>
   );
 }
