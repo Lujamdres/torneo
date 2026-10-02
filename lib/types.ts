@@ -1,6 +1,7 @@
 export interface Team {
   id: number;
   name: string;
+  points: number;
   created_at: string;
 }
 

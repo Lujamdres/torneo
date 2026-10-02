@@ -1,25 +1,25 @@
 @import "tailwindcss";
 
 :root {
-  --background: 0 0% 100%;
-  --foreground: 0 0% 3.9%;
-  --card: 0 0% 100%;
-  --card-foreground: 0 0% 3.9%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 0 0% 3.9%;
-  --primary: 0 0% 9%;
-  --primary-foreground: 0 0% 98%;
-  --secondary: 0 0% 96.1%;
-  --secondary-foreground: 0 0% 9%;
-  --muted: 0 0% 96.1%;
-  --muted-foreground: 0 0% 45.1%;
-  --accent: 0 0% 96.1%;
-  --accent-foreground: 0 0% 9%;
+  --background: 34 63% 88%;
+  --foreground: 213 29% 6%;
+  --card: 36 100% 97%;
+  --card-foreground: 213 29% 6%;
+  --popover: 36 100% 97%;
+  --popover-foreground: 213 29% 6%;
+  --primary: 355 95% 23%;
+  --primary-foreground: 34 63% 88%;
+  --secondary: 33 91% 52%;
+  --secondary-foreground: 213 29% 6%;
+  --muted: 33 49% 83%;
+  --muted-foreground: 213 15% 30%;
+  --accent: 33 91% 52%;
+  --accent-foreground: 213 29% 6%;
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 0 0% 98%;
-  --border: 0 0% 89.8%;
-  --input: 0 0% 89.8%;
-  --ring: 0 0% 3.9%;
+  --border: 355 40% 45%;
+  --input: 355 40% 45%;
+  --ring: 355 95% 23%;
   --radius: 0.5rem;
 }
 
@@ -47,29 +47,7 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-  }
-}
+
 
 body {
   background: hsl(var(--background));
@@ -116,11 +94,11 @@ body {
 }
 
 @keyframes neon-pulse {
-  0%, 100% { 
-    box-shadow: 0 0 5px #6600cc, 0 0 10px #6600cc, 0 0 20px #6600cc, 0 0 40px #6600cc;
+  0%, 100% {
+    box-shadow: 0 0 5px #F49117, 0 0 10px #F49117, 0 0 20px #F49117, 0 0 40px #F49117;
   }
-  50% { 
-    box-shadow: 0 0 10px #6600cc, 0 0 20px #6600cc, 0 0 40px #6600cc, 0 0 80px #6600cc, 0 0 120px #6600cc;
+  50% {
+    box-shadow: 0 0 10px #F49117, 0 0 20px #F49117, 0 0 40px #F49117, 0 0 80px #F49117, 0 0 120px #F49117;
   }
 }
 
@@ -176,28 +154,28 @@ body {
   clip-path: polygon(30% 0%, 70% 0%, 100% 50%, 70% 100%, 30% 100%, 0% 50%);
 }
 
-.text-neon-purple {
-  color: #6600cc;
-  text-shadow: 0 0 10px #6600cc, 0 0 20px #6600cc, 0 0 30px #6600cc;
+.text-vino {
+  color: #73030C;
+  text-shadow: 0 2px 12px rgba(115, 3, 12, 0.35);
 }
 
-.text-neon-cyan {
-  color: #00d9ff;
-  text-shadow: 0 0 10px #00d9ff, 0 0 20px #00d9ff, 0 0 30px #00d9ff;
+.text-mostaza {
+  color: #F49117;
+  text-shadow: 0 2px 12px rgba(244, 145, 23, 0.35);
 }
 
 .bg-esports-dark {
-  background: linear-gradient(135deg, #0f1923 0%, #1a1f2e 50%, #0f1923 100%);
+  background: linear-gradient(135deg, #F3E1CE 0%, #FFF9F0 50%, #F3E1CE 100%);
 }
 
-.border-neon-purple {
-  border-color: #6600cc;
-  box-shadow: 0 0 10px rgba(102, 0, 204, 0.5);
+.border-vino {
+  border-color: #73030C;
+  box-shadow: 0 0 10px rgba(115, 3, 12, 0.5);
 }
 
-.border-neon-cyan {
-  border-color: #00d9ff;
-  box-shadow: 0 0 10px rgba(0, 217, 255, 0.5);
+.border-mostaza {
+  border-color: #F49117;
+  box-shadow: 0 0 10px rgba(244, 145, 23, 0.5);
 }
 
 .bracket-line {
@@ -211,7 +189,7 @@ body {
   top: 50%;
   width: 20px;
   height: 2px;
-  background: linear-gradient(90deg, #6600cc, transparent);
+  background: linear-gradient(90deg, #73030C, transparent);
 }
 
 .bracket-connector {
@@ -225,7 +203,7 @@ body {
   top: 50%;
   width: 20px;
   height: 2px;
-  background: linear-gradient(90deg, transparent, #6600cc);
+  background: linear-gradient(90deg, transparent, #73030C);
 }
 
 /* ========== EASTER EGG: HACKED MODE ========== */
@@ -281,12 +259,12 @@ body {
   animation: hacked-flicker 0.5s infinite !important;
 }
 
-.hacked-mode .text-neon-cyan {
+.hacked-mode .text-mostaza {
   color: #ff0000 !important;
   text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000 !important;
 }
 
-.hacked-mode .text-neon-purple {
+.hacked-mode .text-vino {
   color: #00ff00 !important;
   text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00 !important;
 }

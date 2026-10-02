@@ -8,7 +8,7 @@
 # Inicializar git (si no lo has hecho)
 git init
 git add .
-git commit -m "Initial commit: Torneo de Valorant"
+git commit -m "Initial commit: Liga UTOPIA"
 
 # Subir a GitHub
 git remote add origin https://github.com/tu-usuario/torneito.git

@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Torneo de Valorant",
-  description: "Gestiona torneos de Valorant con amigos - Sistema de brackets automático",
+  title: "UTOPIA - Liga",
+  description: "Liga por puntos para equipos Sistema de tabla de posiciones",
 };
 
 export default function RootLayout({

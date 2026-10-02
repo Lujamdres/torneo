@@ -13,10 +13,14 @@ async function initDatabase() {
       CREATE TABLE IF NOT EXISTS teams (
         id SERIAL PRIMARY KEY,
         name VARCHAR(100) NOT NULL,
+        points INTEGER DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `;
     console.log('✓ Tabla teams creada');
+
+    await sql`ALTER TABLE teams ADD COLUMN IF NOT EXISTS points INTEGER DEFAULT 0`;
+    console.log('✓ Columna points verificada');
 
     await sql`
       CREATE TABLE IF NOT EXISTS tournaments (

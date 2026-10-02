@@ -33,6 +33,39 @@ export async function POST(request: Request) {
   }
 }
 
+export async function PATCH(request: Request) {
+  try {
+    const body = await request.json();
+
+    if (body.reset === true) {
+      await sql`UPDATE teams SET points = 0`;
+      return NextResponse.json({ success: true });
+    }
+
+    const { id, delta } = body;
+
+    if (!id || typeof delta !== 'number') {
+      return NextResponse.json({ error: 'Team ID and delta are required' }, { status: 400 });
+    }
+
+    const result = await sql`
+      UPDATE teams
+      SET points = GREATEST(0, points + ${delta})
+      WHERE id = ${id}
+      RETURNING *
+    `;
+
+    if (result.length === 0) {
+      return NextResponse.json({ error: 'Team not found' }, { status: 404 });
+    }
+
+    return NextResponse.json(result[0]);
+  } catch (error) {
+    console.error('Error updating points:', error);
+    return NextResponse.json({ error: 'Failed to update points' }, { status: 500 });
+  }
+}
+
 export async function DELETE(request: Request) {
   try {
     const { searchParams } = new URL(request.url);

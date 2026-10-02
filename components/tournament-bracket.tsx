@@ -130,16 +130,16 @@ export function TournamentBracket({ tournamentId }: TournamentBracketProps) {
 
   return (
     <div className="space-y-6">
-      <Card className="border-2 border-[#00d9ff]/30 bg-gradient-to-br from-[#1a1f2e] to-[#0f1923] shadow-2xl shadow-[#00d9ff]/10">
-        <CardHeader className="border-b border-[#00d9ff]/20 bg-gradient-to-r from-[#00d9ff]/10 to-transparent">
+      <Card className="border-2 border-[#F49117]/30 bg-gradient-to-br from-[#FFF9F0] to-[#F3E1CE] shadow-2xl shadow-[#F49117]/10">
+        <CardHeader className="border-b border-[#F49117]/20 bg-gradient-to-r from-[#F49117]/10 to-transparent">
           <CardTitle className="flex items-center gap-3 text-2xl uppercase tracking-wider">
             <div className="relative">
-              <Trophy className="h-8 w-8 text-[#00d9ff]" />
-              <div className="absolute inset-0 bg-[#00d9ff] blur-md opacity-50" />
+              <Trophy className="h-8 w-8 text-[#F49117]" />
+              <div className="absolute inset-0 bg-[#F49117] blur-md opacity-50" />
             </div>
-            <span className="text-neon-cyan font-black">TOURNAMENT BRACKET</span>
+            <span className="text-mostaza font-black">TOURNAMENT BRACKET</span>
           </CardTitle>
-          <CardDescription className="text-base text-gray-400 uppercase text-xs tracking-widest">
+          <CardDescription className="text-base text-[#0B0F14]/60 uppercase text-xs tracking-widest">
             // COMPETITIVE MATCHES
           </CardDescription>
         </CardHeader>
@@ -152,48 +152,48 @@ export function TournamentBracket({ tournamentId }: TournamentBracketProps) {
                 <div key={match.id} className="relative flex items-center">
                   {/* Conector izquierdo (para lado derecho del bracket) */}
                   {connectorSide === 'right' && (
-                    <div className="w-10 h-0.5 bg-[#6600cc]/60" />
+                    <div className="w-10 h-0.5 bg-[#73030C]/60" />
                   )}
                   <div className={`relative border-2 p-3 w-56 transition-all ${
                     match.status === 'completed'
-                      ? 'bg-[#1a1f2e] border-[#00d9ff] shadow-lg shadow-[#00d9ff]/20'
-                      : 'bg-[#1a1f2e] border-[#6600cc]/30 hover:border-[#6600cc]'
+                      ? 'bg-[#FFF9F0] border-[#F49117] shadow-lg shadow-[#F49117]/20'
+                      : 'bg-[#FFF9F0] border-[#73030C]/30 hover:border-[#73030C]'
                   }`}>
                     {!isBye ? (
                       <div className="space-y-1">
                         <div className={`flex items-center justify-between p-2 border-l-2 ${
-                          match.winner_id === match.team1_id ? 'border-[#00d9ff] bg-[#00d9ff]/10' : 'border-[#6600cc]/30'
+                          match.winner_id === match.team1_id ? 'border-[#F49117] bg-[#F49117]/10' : 'border-[#73030C]/30'
                         }`}>
                           <span className={`font-bold text-sm truncate mr-2 ${
-                            match.winner_id === match.team1_id ? 'text-[#00d9ff]' : 'text-white'
+                            match.winner_id === match.team1_id ? 'text-[#73030C]' : 'text-[#0B0F14]'
                           }`}>{match.team1_name}</span>
                           {match.status !== 'completed' && (
                             <Button size="sm" onClick={() => handleSetWinner(match.id, match.team1_id)}
-                              disabled={loading} className="h-6 px-2 bg-[#6600cc] hover:bg-[#6600cc]/80 text-white text-xs shrink-0">WIN</Button>
+                              disabled={loading} className="h-6 px-2 bg-[#73030C] hover:bg-[#73030C]/80 text-white text-xs shrink-0">WIN</Button>
                           )}
                         </div>
                         <div className={`flex items-center justify-between p-2 border-l-2 ${
-                          match.winner_id === match.team2_id ? 'border-[#00d9ff] bg-[#00d9ff]/10' : 'border-[#6600cc]/30'
+                          match.winner_id === match.team2_id ? 'border-[#F49117] bg-[#F49117]/10' : 'border-[#73030C]/30'
                         }`}>
                           <span className={`font-bold text-sm truncate mr-2 ${
-                            match.winner_id === match.team2_id ? 'text-[#00d9ff]' : 'text-white'
+                            match.winner_id === match.team2_id ? 'text-[#73030C]' : 'text-[#0B0F14]'
                           }`}>{match.team2_name}</span>
                           {match.status !== 'completed' && (
                             <Button size="sm" onClick={() => handleSetWinner(match.id, match.team2_id)}
-                              disabled={loading} className="h-6 px-2 bg-[#6600cc] hover:bg-[#6600cc]/80 text-white text-xs shrink-0">WIN</Button>
+                              disabled={loading} className="h-6 px-2 bg-[#73030C] hover:bg-[#73030C]/80 text-white text-xs shrink-0">WIN</Button>
                           )}
                         </div>
                       </div>
                     ) : (
                       <div className="text-center py-2">
-                        <p className="font-semibold text-sm">{match.team1_name}</p>
-                        <p className="text-xs text-gray-400">BYE</p>
+                        <p className="font-semibold text-sm text-[#0B0F14]">{match.team1_name}</p>
+                        <p className="text-xs text-[#0B0F14]/50">BYE</p>
                       </div>
                     )}
                   </div>
                   {/* Conector derecho (para lado izquierdo del bracket) */}
                   {connectorSide === 'left' && (
-                    <div className="w-10 h-0.5 bg-[#6600cc]/60" />
+                    <div className="w-10 h-0.5 bg-[#73030C]/60" />
                   )}
                 </div>
               );
@@ -222,8 +222,8 @@ export function TournamentBracket({ tournamentId }: TournamentBracketProps) {
 
                     return (
                       <div key={`L-${round}`} className="flex flex-col mr-4">
-                        <div className="mb-4 px-3 py-2 bg-[#6600cc]/10 border border-[#6600cc]/50 text-center">
-                          <h3 className="text-sm font-black uppercase tracking-widest text-neon-purple">{roundName}</h3>
+                        <div className="mb-4 px-3 py-2 bg-[#73030C]/10 border border-[#73030C]/50 text-center">
+                          <h3 className="text-sm font-black uppercase tracking-widest text-vino">{roundName}</h3>
                         </div>
                         <div className="flex flex-col justify-around flex-1" style={{ minHeight: `${bracketHeight}px` }}>
                           {leftMatches.map((m) => renderMatchCard(m, 'left'))}
@@ -236,10 +236,10 @@ export function TournamentBracket({ tournamentId }: TournamentBracketProps) {
                 {/* ========== FINAL EN EL CENTRO ========== */}
                 <div className="flex flex-col items-center justify-center" style={{ minHeight: `${bracketHeight}px` }}>
                   <div className={`mb-4 px-5 py-3 border-2 text-center ${
-                    hasFinalMatch ? 'bg-[#00d9ff]/10 border-[#00d9ff] animate-neon-pulse' : 'bg-[#6600cc]/5 border-[#6600cc]/30'
+                    hasFinalMatch ? 'bg-[#F49117]/10 border-[#F49117] animate-neon-pulse' : 'bg-[#73030C]/5 border-[#73030C]/30'
                   }`}>
                     <h3 className={`text-xl font-black uppercase tracking-widest flex items-center gap-2 ${
-                      hasFinalMatch ? 'text-neon-cyan' : 'text-gray-500'
+                      hasFinalMatch ? 'text-mostaza' : 'text-[#0B0F14]/40'
                     }`}>
                       <Trophy className={`h-5 w-5 ${hasFinalMatch ? 'animate-float' : 'opacity-30'}`} />
                       FINAL
@@ -248,8 +248,8 @@ export function TournamentBracket({ tournamentId }: TournamentBracketProps) {
                   {hasFinalMatch ? (
                     finalMatches.map((m) => renderMatchCard(m, 'none'))
                   ) : (
-                    <div className="w-56 border-2 border-dashed border-[#6600cc]/20 p-6 text-center">
-                      <p className="text-xs text-gray-500 uppercase tracking-widest">Por definir</p>
+                    <div className="w-56 border-2 border-dashed border-[#73030C]/20 p-6 text-center">
+                      <p className="text-xs text-[#0B0F14]/40 uppercase tracking-widest">Por definir</p>
                     </div>
                   )}
 
@@ -278,8 +278,8 @@ export function TournamentBracket({ tournamentId }: TournamentBracketProps) {
 
                     return (
                       <div key={`R-${round}`} className="flex flex-col ml-4">
-                        <div className="mb-4 px-3 py-2 bg-[#6600cc]/10 border border-[#6600cc]/50 text-center">
-                          <h3 className="text-sm font-black uppercase tracking-widest text-neon-purple">{roundName}</h3>
+                        <div className="mb-4 px-3 py-2 bg-[#73030C]/10 border border-[#73030C]/50 text-center">
+                          <h3 className="text-sm font-black uppercase tracking-widest text-vino">{roundName}</h3>
                         </div>
                         <div className="flex flex-col justify-around flex-1" style={{ minHeight: `${bracketHeight}px` }}>
                           {rightMatches.map((m) => renderMatchCard(m, 'right'))}
@@ -299,7 +299,7 @@ export function TournamentBracket({ tournamentId }: TournamentBracketProps) {
         <div className="flex justify-center mb-6">
           <Button
             onClick={() => setShowPodium(true)}
-            className="bg-gradient-to-r from-[#6600cc] to-[#00d9ff] hover:from-[#6600cc]/80 hover:to-[#00d9ff]/80 text-white shadow-lg shadow-[#00d9ff]/50 hover:shadow-xl font-black uppercase tracking-wider text-lg px-8 py-6"
+            className="bg-gradient-to-r from-[#73030C] to-[#F49117] hover:from-[#73030C]/80 hover:to-[#F49117]/80 text-white shadow-lg shadow-[#F49117]/50 hover:shadow-xl font-black uppercase tracking-wider text-lg px-8 py-6"
           >
             <Medal className="h-6 w-6 mr-2" />
             VER PODIO
@@ -309,57 +309,57 @@ export function TournamentBracket({ tournamentId }: TournamentBracketProps) {
 
       {/* Card del Campeón - Solo aparece al final cuando la final está completada */}
       {champion && (
-        <Card className="relative border-4 border-[#00d9ff] bg-gradient-to-br from-[#1a1f2e] via-[#6600cc] to-[#1a1f2e] overflow-hidden animate-bounce-in shadow-2xl shadow-[#00d9ff]/50">
+        <Card className="relative border-4 border-[#F49117] bg-gradient-to-br from-[#FFF9F0] via-[#73030C] to-[#FFF9F0] overflow-hidden animate-bounce-in shadow-2xl shadow-[#F49117]/50">
           {/* Efectos de fondo */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#6600cc]/10 via-[#00d9ff]/10 to-[#6600cc]/10 animate-shimmer" />
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#6600cc] via-[#00d9ff] to-[#6600cc] animate-pulse" />
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#6600cc] via-[#00d9ff] to-[#6600cc] animate-pulse" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#73030C]/10 via-[#F49117]/10 to-[#73030C]/10 animate-shimmer" />
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#73030C] via-[#F49117] to-[#73030C] animate-pulse" />
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#73030C] via-[#F49117] to-[#73030C] animate-pulse" />
           
           {/* Hexágonos decorativos */}
-          <div className="absolute top-4 left-4 w-16 h-16 hexagon-clip bg-[#6600cc]/20 animate-pulse" />
-          <div className="absolute top-4 right-4 w-16 h-16 hexagon-clip bg-[#00d9ff]/20 animate-pulse" style={{ animationDelay: '0.5s' }} />
-          <div className="absolute bottom-4 left-1/4 w-12 h-12 hexagon-clip bg-[#6600cc]/30 animate-pulse" style={{ animationDelay: '1s' }} />
-          <div className="absolute bottom-4 right-1/4 w-12 h-12 hexagon-clip bg-[#00d9ff]/30 animate-pulse" style={{ animationDelay: '1.5s' }} />
+          <div className="absolute top-4 left-4 w-16 h-16 hexagon-clip bg-[#73030C]/20 animate-pulse" />
+          <div className="absolute top-4 right-4 w-16 h-16 hexagon-clip bg-[#F49117]/20 animate-pulse" style={{ animationDelay: '0.5s' }} />
+          <div className="absolute bottom-4 left-1/4 w-12 h-12 hexagon-clip bg-[#73030C]/30 animate-pulse" style={{ animationDelay: '1s' }} />
+          <div className="absolute bottom-4 right-1/4 w-12 h-12 hexagon-clip bg-[#F49117]/30 animate-pulse" style={{ animationDelay: '1.5s' }} />
           
           <CardContent className="pt-12 pb-12 relative z-10">
             <div className="text-center space-y-8">
               {/* Corona con efectos neón */}
               <div className="relative inline-block">
-                <div className="absolute inset-0 bg-[#00d9ff] blur-3xl opacity-50 animate-pulse" />
-                <Crown className="h-32 w-32 mx-auto text-[#00d9ff] animate-float drop-shadow-2xl relative z-10" />
-                <div className="absolute -top-2 -right-2 w-8 h-8 bg-[#6600cc] rounded-full animate-ping" />
-                <div className="absolute -bottom-2 -left-2 w-8 h-8 bg-[#00d9ff] rounded-full animate-ping" style={{ animationDelay: '0.5s' }} />
+                <div className="absolute inset-0 bg-[#F49117] blur-3xl opacity-50 animate-pulse" />
+                <Crown className="h-32 w-32 mx-auto text-[#F49117] animate-float drop-shadow-2xl relative z-10" />
+                <div className="absolute -top-2 -right-2 w-8 h-8 bg-[#73030C] rounded-full animate-ping" />
+                <div className="absolute -bottom-2 -left-2 w-8 h-8 bg-[#F49117] rounded-full animate-ping" style={{ animationDelay: '0.5s' }} />
               </div>
               
               {/* Título CHAMPION */}
               <div className="space-y-4">
                 <div className="relative">
                   <h2 className="text-6xl md:text-8xl font-black uppercase tracking-wider">
-                    <span className="text-neon-cyan drop-shadow-2xl">CHAMPION</span>
+                    <span className="text-mostaza drop-shadow-2xl">CHAMPION</span>
                   </h2>
-                  <div className="h-2 w-full bg-gradient-to-r from-[#6600cc] via-[#00d9ff] to-[#6600cc] mt-3 animate-shimmer" />
+                  <div className="h-2 w-full bg-gradient-to-r from-[#73030C] via-[#F49117] to-[#73030C] mt-3 animate-shimmer" />
                 </div>
                 
                 {/* Nombre del ganador */}
-                <div className="relative inline-block py-6 px-8 bg-[#00d9ff]/10 border-2 border-[#00d9ff] rounded animate-neon-pulse">
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#6600cc]/20 to-[#00d9ff]/20 animate-shimmer" />
+                <div className="relative inline-block py-6 px-8 bg-[#F49117]/10 border-2 border-[#F49117] rounded animate-neon-pulse">
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#73030C]/20 to-[#F49117]/20 animate-shimmer" />
                   <p className="text-4xl md:text-5xl font-black uppercase tracking-widest relative z-10">
-                    <span className="text-white drop-shadow-lg">{champion.winner_name}</span>
+                    <span className="text-[#73030C] drop-shadow-lg">{champion.winner_name}</span>
                   </p>
                 </div>
               </div>
               
               {/* Líneas decorativas */}
               <div className="flex items-center justify-center gap-4 pt-4">
-                <div className="h-px w-32 bg-gradient-to-r from-transparent to-[#6600cc]" />
-                <div className="w-3 h-3 bg-[#6600cc] rotate-45 animate-pulse" />
-                <div className="h-px w-32 bg-gradient-to-r from-[#6600cc] to-[#00d9ff]" />
-                <div className="w-3 h-3 bg-[#00d9ff] rotate-45 animate-pulse" style={{ animationDelay: '0.5s' }} />
-                <div className="h-px w-32 bg-gradient-to-r from-[#00d9ff] to-transparent" />
+                <div className="h-px w-32 bg-gradient-to-r from-transparent to-[#73030C]" />
+                <div className="w-3 h-3 bg-[#73030C] rotate-45 animate-pulse" />
+                <div className="h-px w-32 bg-gradient-to-r from-[#73030C] to-[#F49117]" />
+                <div className="w-3 h-3 bg-[#F49117] rotate-45 animate-pulse" style={{ animationDelay: '0.5s' }} />
+                <div className="h-px w-32 bg-gradient-to-r from-[#F49117] to-transparent" />
               </div>
               
               {/* Mensaje de victoria */}
-              <p className="text-xl font-bold text-gray-400 uppercase tracking-widest animate-pulse">
+              <p className="text-xl font-bold text-[#0B0F14]/60 uppercase tracking-widest animate-pulse">
                 // TOURNAMENT WINNER
               </p>
             </div>
