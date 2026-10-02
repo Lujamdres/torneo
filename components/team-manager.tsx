@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Trash2, Users, UserPlus, Shield } from 'lucide-react';
 import { Team } from '@/lib/types';
+import { addTeam, removeTeam } from '@/lib/store';
 import { playAdd, playDelete } from '@/lib/sounds';
 
 interface TeamManagerProps {
@@ -23,13 +24,8 @@ export function TeamManager({ teams, onTeamsChange }: TeamManagerProps) {
 
     setLoading(true);
     try {
-      const res = await fetch('/api/teams', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newTeamName }),
-      });
-
-      if (res.ok) {
+      const team = await addTeam(newTeamName);
+      if (team) {
         playAdd();
         setNewTeamName('');
         onTeamsChange();
@@ -45,7 +41,7 @@ export function TeamManager({ teams, onTeamsChange }: TeamManagerProps) {
     if (!confirm('¿Estás seguro de eliminar este equipo?')) return;
 
     try {
-      await fetch(`/api/teams?id=${id}`, { method: 'DELETE' });
+      await removeTeam(id);
       playDelete();
       onTeamsChange();
     } catch (error) {

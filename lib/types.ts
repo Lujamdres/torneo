@@ -30,3 +30,10 @@ export interface MatchWithTeams extends Match {
   team2_name: string;
   winner_name: string | null;
 }
+
+export interface Matchup {
+  id: number;
+  a: Team;
+  b: Team;
+  winnerId: number | null;
+}

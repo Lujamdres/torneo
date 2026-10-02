@@ -2,42 +2,45 @@
 
 import { useState, useRef } from 'react';
 import { playClick } from '@/lib/sounds';
+import { Team } from '@/lib/types';
 
-const OPTIONS = ['Equipo A', 'Equipo B', 'Equipo C'];
-const COLORS = ['#73030C', '#F49117', '#0B0F14'];
-const SEGMENT_ANGLE = 360 / OPTIONS.length;
+const PALETTE = ['#73030C', '#F49117', '#0B0F14'];
 
-export function Roulette() {
+interface RouletteProps {
+  teams: Team[];
+  onMatchup: (a: Team, b: Team) => void;
+}
+
+export function Roulette({ teams, onMatchup }: RouletteProps) {
   const [spinning, setSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
+  const [pickA, setPickA] = useState<Team | null>(null);
   const [result, setResult] = useState<string | null>(null);
   const wheelRef = useRef<SVGSVGElement>(null);
 
+  const options = teams.map((t) => t.name);
+  const segmentAngle = options.length > 0 ? 360 / options.length : 360;
+
   const spin = () => {
-    if (spinning) return;
+    if (spinning || teams.length < 2) return;
     playClick();
     setSpinning(true);
     setResult(null);
 
-    // Random extra turns (5-8 full rotations) + random final position
     const extraTurns = (5 + Math.random() * 3) * 360;
     const randomAngle = Math.random() * 360;
     const newRotation = rotation + extraTurns + randomAngle;
 
     setRotation(newRotation);
 
-    // After animation ends, calculate result
     setTimeout(() => {
-      // The pointer is at the top (0°). Calculate which segment is there.
       const finalAngle = newRotation % 360;
-      // Pointer at top = 270° in standard coords, but we rotate clockwise.
-      // The segment under the pointer: (360 - finalAngle) mod 360
       const pointerAngle = (360 - (finalAngle % 360)) % 360;
-      const index = Math.floor(pointerAngle / SEGMENT_ANGLE) % OPTIONS.length;
-      setResult(OPTIONS[index]);
+      const index = Math.floor(pointerAngle / segmentAngle) % options.length;
+      const picked = teams[index];
+
       setSpinning(false);
 
-      // Play a victorious sound for the result
       const ctx = new AudioContext();
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -49,13 +52,23 @@ export function Roulette() {
       gain.connect(ctx.destination);
       osc.start();
       osc.stop(ctx.currentTime + 0.3);
+
+      if (!pickA) {
+        setPickA(picked);
+      } else if (picked.id === pickA.id) {
+        setResult('¡Mismo equipo! Gira de nuevo');
+        setTimeout(() => spin(), 1200);
+      } else {
+        setResult(`${pickA.name} vs ${picked.name}`);
+        onMatchup(pickA, picked);
+        setPickA(null);
+      }
     }, 4000);
   };
 
-  // Build SVG pie segments
   const buildSegmentPath = (index: number) => {
-    const startAngle = (index * SEGMENT_ANGLE - 90) * (Math.PI / 180);
-    const endAngle = ((index + 1) * SEGMENT_ANGLE - 90) * (Math.PI / 180);
+    const startAngle = (index * segmentAngle - 90) * (Math.PI / 180);
+    const endAngle = ((index + 1) * segmentAngle - 90) * (Math.PI / 180);
     const radius = 120;
     const cx = 150, cy = 150;
 
@@ -64,13 +77,13 @@ export function Roulette() {
     const x2 = cx + radius * Math.cos(endAngle);
     const y2 = cy + radius * Math.sin(endAngle);
 
-    const largeArc = SEGMENT_ANGLE > 180 ? 1 : 0;
+    const largeArc = segmentAngle > 180 ? 1 : 0;
 
     return `M ${cx} ${cy} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2} Z`;
   };
 
   const getTextPosition = (index: number) => {
-    const midAngle = ((index + 0.5) * SEGMENT_ANGLE - 90) * (Math.PI / 180);
+    const midAngle = ((index + 0.5) * segmentAngle - 90) * (Math.PI / 180);
     const radius = 75;
     const cx = 150, cy = 150;
     return {
@@ -79,11 +92,42 @@ export function Roulette() {
     };
   };
 
+  if (teams.length < 2) {
+    return (
+      <div className="flex flex-col items-center gap-4 py-6">
+        <h3 className="text-sm font-black uppercase tracking-widest text-[#0B0F14]/60">
+          // RULETA DE ENFRENTAMIENTOS
+        </h3>
+        <div className="w-40 h-40 rounded-full border-4 border-dashed border-[#73030C]/30 flex items-center justify-center">
+          <span className="text-4xl">?</span>
+        </div>
+        <p className="text-xs text-[#0B0F14]/50 text-center uppercase tracking-widest">
+          Agrega al menos 2 equipos para sortear
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col items-center gap-4">
       <h3 className="text-sm font-black uppercase tracking-widest text-[#0B0F14]/60">
-        // SELECTOR DE EQUIPO
+        // RULETA DE ENFRENTAMIENTOS
       </h3>
+
+      {/* Indicador de turno */}
+      <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest">
+        <span className={`px-3 py-1 rounded-full border-2 ${
+          !pickA ? 'bg-[#73030C] text-[#F3E1CE] border-[#73030C]' : 'border-[#73030C]/30 text-[#0B0F14]/50'
+        }`}>
+          1° equipo
+        </span>
+        <span className="text-[#F49117] font-black">VS</span>
+        <span className={`px-3 py-1 rounded-full border-2 ${
+          pickA ? 'bg-[#73030C] text-[#F3E1CE] border-[#73030C]' : 'border-[#73030C]/30 text-[#0B0F14]/50'
+        }`}>
+          {pickA ? `2° equipo (vs ${pickA.name})` : '2° equipo'}
+        </span>
+      </div>
 
       <div className="relative">
         {/* Pointer triangle at top */}
@@ -113,17 +157,18 @@ export function Roulette() {
           <circle cx="150" cy="150" r="140" fill="none" stroke="#73030C" strokeWidth="3" opacity="0.5" />
           <circle cx="150" cy="150" r="122" fill="none" stroke="#F49117" strokeWidth="1" opacity="0.3" />
 
-          {OPTIONS.map((option, i) => {
+          {options.map((option, i) => {
             const textPos = getTextPosition(i);
-            const midAngle = (i + 0.5) * SEGMENT_ANGLE - 90;
+            const midAngle = (i + 0.5) * segmentAngle - 90;
+            const color = PALETTE[i % PALETTE.length];
             return (
-              <g key={i}>
+              <g key={teams[i].id}>
                 <path
                   d={buildSegmentPath(i)}
-                  fill={COLORS[i]}
+                  fill={color}
                   stroke="#F3E1CE"
                   strokeWidth="2"
-                  opacity="0.85"
+                  opacity="0.9"
                   className="hover:opacity-100 transition-opacity"
                 />
                 <text
@@ -132,14 +177,14 @@ export function Roulette() {
                   textAnchor="middle"
                   dominantBaseline="central"
                   fill="white"
-                  fontSize="13"
+                  fontSize={options.length > 6 ? 10 : 13}
                   fontWeight="900"
                   letterSpacing="1"
                   transform={`rotate(${midAngle}, ${textPos.x}, ${textPos.y})`}
                   className="uppercase select-none pointer-events-none"
                   style={{ textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}
                 >
-                  {option}
+                  {option.length > 12 ? option.slice(0, 11) + '…' : option}
                 </text>
               </g>
             );
@@ -158,7 +203,7 @@ export function Roulette() {
             letterSpacing="1"
             className="uppercase select-none pointer-events-none"
           >
-            SPIN
+            VS
           </text>
         </svg>
       </div>
@@ -167,19 +212,19 @@ export function Roulette() {
       <button
         onClick={spin}
         disabled={spinning}
-        className={`px-8 py-3 font-black uppercase tracking-widest text-sm border-2 transition-all duration-300 ${
+        className={`px-8 py-3 font-black uppercase tracking-widest text-sm border-2 transition-all duration-300 rounded ${
           spinning
             ? 'border-[#0B0F14]/30 text-[#0B0F14]/30 cursor-not-allowed'
             : 'border-[#73030C] text-[#73030C] hover:bg-[#73030C]/10 hover:shadow-lg hover:shadow-[#73030C]/20 active:scale-95'
         }`}
       >
-        {spinning ? 'GIRANDO...' : 'GIRAR RULETA'}
+        {spinning ? 'GIRANDO...' : pickA ? 'GIRAR: 2° EQUIPO' : 'GIRAR RULETA'}
       </button>
 
       {/* Result */}
       {result && !spinning && (
         <div className="mt-2 p-4 border-2 border-[#F49117] bg-[#F49117]/10 text-center animate-pulse rounded">
-          <p className="text-xs text-[#0B0F14]/60 uppercase tracking-widest mb-1">Resultado</p>
+          <p className="text-xs text-[#0B0F14]/60 uppercase tracking-widest mb-1">Enfrentamiento</p>
           <p className="text-2xl font-black text-[#73030C] uppercase tracking-wider">
             {result}
           </p>

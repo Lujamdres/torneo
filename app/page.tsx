@@ -3,30 +3,60 @@
 import { useState, useEffect } from 'react';
 import { TeamManager } from '@/components/team-manager';
 import { StandingsTable } from '@/components/standings-table';
+import { Matchups } from '@/components/matchups';
+import { PWARegister } from '@/components/pwa-register';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Trophy } from 'lucide-react';
+import { Trophy, WifiOff } from 'lucide-react';
 import { Roulette } from '@/components/roulette';
-import { Team } from '@/lib/types';
-import { playReset, playHack } from '@/lib/sounds';
+import { Team, Matchup } from '@/lib/types';
+import { getTeams, resetPoints, addPoints, isOffline } from '@/lib/store';
+import { playReset, playHack, playWin } from '@/lib/sounds';
+
+const MATCHUPS_KEY = 'utopia_matchups';
 
 export default function Home() {
   const [teams, setTeams] = useState<Team[]>([]);
+  const [matchups, setMatchups] = useState<Matchup[]>([]);
   const [loading, setLoading] = useState(false);
   const [hacked, setHacked] = useState(false);
+  const [offline, setOffline] = useState(false);
 
   useEffect(() => {
     fetchTeams();
+    try {
+      setMatchups(JSON.parse(localStorage.getItem(MATCHUPS_KEY) || '[]'));
+    } catch {}
   }, []);
+
+  const saveMatchups = (list: Matchup[]) => {
+    setMatchups(list);
+    localStorage.setItem(MATCHUPS_KEY, JSON.stringify(list));
+  };
 
   const fetchTeams = async () => {
     try {
-      const res = await fetch('/api/teams');
-      const data = await res.json();
+      const data = await getTeams();
       setTeams(data);
+      setOffline(isOffline());
     } catch (error) {
       console.error('Error fetching teams:', error);
     }
+  };
+
+  const handleMatchup = (a: Team, b: Team) => {
+    saveMatchups([{ id: Date.now(), a, b, winnerId: null }, ...matchups]);
+  };
+
+  const handleMatchupResult = async (matchup: Matchup, winnerId: number) => {
+    playWin();
+    saveMatchups(matchups.map((m) => (m.id === matchup.id ? { ...m, winnerId } : m)));
+    await addPoints(winnerId, 3);
+    fetchTeams();
+  };
+
+  const handleRemoveMatchup = (id: number) => {
+    saveMatchups(matchups.filter((m) => m.id !== id));
   };
 
   const handleResetPoints = async () => {
@@ -37,17 +67,8 @@ export default function Home() {
     setLoading(true);
     playReset();
     try {
-      const res = await fetch('/api/teams', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reset: true }),
-      });
-
-      if (res.ok) {
-        fetchTeams();
-      } else {
-        alert('Error al reiniciar los puntos');
-      }
+      await resetPoints();
+      fetchTeams();
     } catch (error) {
       console.error('Error resetting points:', error);
       alert('Error al reiniciar los puntos');
@@ -58,6 +79,7 @@ export default function Home() {
 
   return (
     <div className={`min-h-screen bg-gradient-to-br from-[#F3E1CE] via-[#FFF9F0] to-[#F3E1CE] transition-all duration-500 ${hacked ? 'hacked-mode' : ''}`}>
+      <PWARegister />
       {/* Easter egg: HACKEO EN PROGRESO */}
       {hacked && (
         <div className="fixed inset-0 z-50 pointer-events-none">
@@ -108,6 +130,14 @@ export default function Home() {
               </p>
             </div>
 
+            {/* Indicador offline */}
+            {offline && (
+              <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#0B0F14] text-[#F3E1CE] text-xs font-bold uppercase tracking-widest">
+                <WifiOff className="h-4 w-4" />
+                Modo offline — datos locales
+              </div>
+            )}
+
             {/* Línea decorativa inferior */}
             <div className="mt-6 flex items-center justify-center gap-4">
               <div className="h-px w-24 bg-gradient-to-r from-transparent to-[#73030C]" />
@@ -120,7 +150,15 @@ export default function Home() {
         </header>
 
         <div className="grid gap-6 lg:grid-cols-2 mb-6">
-          <TeamManager teams={teams} onTeamsChange={fetchTeams} />
+          <div className="space-y-6">
+            <TeamManager teams={teams} onTeamsChange={fetchTeams} />
+            <Matchups
+              matchups={matchups}
+              onResult={handleMatchupResult}
+              onRemove={handleRemoveMatchup}
+              loading={loading}
+            />
+          </div>
 
           <Card className="border-2 border-[#73030C]/40 bg-gradient-to-br from-[#FFF9F0] to-[#F3E1CE] shadow-2xl shadow-[#73030C]/10">
             <CardHeader className="border-b border-[#F49117]/40 bg-[#73030C] rounded-t-xl">
@@ -152,8 +190,8 @@ export default function Home() {
                     2
                   </div>
                   <div>
-                    <p className="font-medium text-sm text-[#0B0F14]">Suma puntos</p>
-                    <p className="text-xs text-[#0B0F14]/60">Usa los botones de la tabla después de cada ronda </p>
+                    <p className="font-medium text-sm text-[#0B0F14]">Sortea enfrentamientos</p>
+                    <p className="text-xs text-[#0B0F14]/60">Gira la ruleta dos veces y marca al ganador (+3 pts)</p>
                   </div>
                 </div>
 
@@ -169,7 +207,7 @@ export default function Home() {
               </div>
 
               <div className="border-t border-[#73030C]/20 pt-6">
-                <Roulette />
+                <Roulette teams={teams} onMatchup={handleMatchup} />
               </div>
 
               <Button

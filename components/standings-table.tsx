@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Trophy, Plus, Minus, Medal } from 'lucide-react';
 import { Team } from '@/lib/types';
+import { addPoints } from '@/lib/store';
 import { playWin, playDelete } from '@/lib/sounds';
 
 interface StandingsTableProps {
@@ -24,20 +25,13 @@ export function StandingsTable({ teams, onTeamsChange }: StandingsTableProps) {
   const handleAddPoints = async (teamId: number, delta: number) => {
     setLoading(teamId);
     try {
-      const res = await fetch('/api/teams', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: teamId, delta }),
-      });
-
-      if (res.ok) {
-        if (delta > 0) {
-          playWin();
-        } else {
-          playDelete();
-        }
-        onTeamsChange();
+      await addPoints(teamId, delta);
+      if (delta > 0) {
+        playWin();
+      } else {
+        playDelete();
       }
+      onTeamsChange();
     } catch (error) {
       console.error('Error updating points:', error);
     } finally {
