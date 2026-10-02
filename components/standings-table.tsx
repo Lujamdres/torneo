@@ -78,13 +78,13 @@ export function StandingsTable({ teams, onTeamsChange }: StandingsTableProps) {
                   }`}
                 >
                   <div className="flex items-center justify-between gap-4 flex-wrap">
-                    <div className="flex items-center gap-4 min-w-0">
+                    <div className="flex items-center gap-4 min-w-0 flex-1">
                       <div className={`flex items-center justify-center w-10 h-10 hexagon-clip font-black text-sm shrink-0 ${
                         isLeader ? 'bg-[#F49117] text-[#0B0F14]' : 'bg-[#73030C] text-[#F3E1CE]'
                       }`}>
                         {index + 1}
                       </div>
-                      <div className="min-w-0">
+                      <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
                           <span className="font-bold text-base text-[#0B0F14] uppercase tracking-wide truncate">
                             {team.name}
@@ -92,7 +92,7 @@ export function StandingsTable({ teams, onTeamsChange }: StandingsTableProps) {
                           {isLeader && <Medal className="h-4 w-4 text-[#F49117] shrink-0" />}
                         </div>
                         {/* Medidor de puntos */}
-                        <div className="mt-2 h-3 w-48 md:w-64 rounded-full bg-[#73030C]/10 overflow-hidden">
+                        <div className="mt-2 h-3 w-full rounded-full bg-[#73030C]/10 overflow-hidden">
                           <div
                             className="h-full rounded-full bg-gradient-to-r from-[#73030C] to-[#F49117] transition-all duration-500"
                             style={{ width: `${(team.points / maxPoints) * 100}%` }}
