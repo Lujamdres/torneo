@@ -1,39 +1,50 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { playClick } from '@/lib/sounds';
-import { Team, Matchup } from '@/lib/types';
-import { getRoundState } from '@/lib/rounds';
+import { Team } from '@/lib/types';
+import { Eye, EyeOff } from 'lucide-react';
 
 const PALETTE = ['#73030C', '#F49117', '#0B0F14'];
+const HIDDEN_KEY = 'utopia_hidden_teams';
 
 interface RouletteProps {
   teams: Team[];
-  matchups: Matchup[];
   onMatchup: (a: Team, b: Team) => void;
 }
 
-export function Roulette({ teams, matchups, onMatchup }: RouletteProps) {
+export function Roulette({ teams, onMatchup }: RouletteProps) {
   const [spinning, setSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [pickA, setPickA] = useState<Team | null>(null);
   const [result, setResult] = useState<string | null>(null);
+  const [hiddenIds, setHiddenIds] = useState<number[]>([]);
 
-  const state = getRoundState(teams, matchups);
-  const usedIds = new Set(state.usedIds);
-  const available = teams.filter((t) => !usedIds.has(t.id));
+  useEffect(() => {
+    try {
+      setHiddenIds(JSON.parse(localStorage.getItem(HIDDEN_KEY) || '[]'));
+    } catch {
+      setHiddenIds([]);
+    }
+  }, []);
 
-  // Equipos elegibles para el giro actual: los que no han jugado esta ronda,
-  // priorizando los que menos enfrentamientos acumulados tienen (bye rotativo).
-  const candidates = available
-    .filter((t) => t.id !== pickA?.id)
-    .reduce<Team[]>((acc, t) => {
-      const c = state.counts[t.id] ?? 0;
-      if (acc.length === 0 || c < (state.counts[acc[0].id] ?? 0)) return [t];
-      if (c === (state.counts[acc[0].id] ?? 0)) acc.push(t);
-      return acc;
-    }, []);
+  const setHidden = (ids: number[]) => {
+    setHiddenIds(ids);
+    localStorage.setItem(HIDDEN_KEY, JSON.stringify(ids));
+  };
 
+  const toggleHidden = (id: number) => {
+    playClick();
+    setHidden(hiddenIds.includes(id) ? hiddenIds.filter((h) => h !== id) : [...hiddenIds, id]);
+  };
+
+  const hideIds = (ids: number[]) => {
+    setHidden([...new Set([...hiddenIds, ...ids])]);
+  };
+
+  const hidden = new Set(hiddenIds);
+  const visible = teams.filter((t) => !hidden.has(t.id));
+  const candidates = visible.filter((t) => t.id !== pickA?.id);
   const segmentAngle = candidates.length > 0 ? 360 / candidates.length : 360;
 
   const spin = () => {
@@ -73,6 +84,7 @@ export function Roulette({ teams, matchups, onMatchup }: RouletteProps) {
       } else {
         setResult(`${pickA.name} vs ${picked.name}`);
         onMatchup(pickA, picked);
+        hideIds([pickA.id, picked.id]);
         setPickA(null);
       }
     }, 4000);
@@ -126,31 +138,37 @@ export function Roulette({ teams, matchups, onMatchup }: RouletteProps) {
         // RULETA DE ENFRENTAMIENTOS
       </h3>
 
-      {/* Ronda + estado de equipos */}
-      <div className="flex flex-col items-center gap-2">
-        <span className="px-3 py-1 rounded-full bg-[#F49117]/20 border-2 border-[#F49117] text-[#73030C] text-xs font-black uppercase tracking-widest">
-          Ronda {state.round}
-        </span>
+      {/* Toggles de visibilidad */}
+      <div className="flex flex-col items-center gap-1.5">
+        <p className="text-[10px] text-[#0B0F14]/50 uppercase tracking-widest">
+          Toca para ocultar/mostrar en la ruleta
+        </p>
         <div className="flex flex-wrap justify-center gap-1.5 max-w-xs">
-          {teams.map((t) => (
-            <span
-              key={t.id}
-              className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide border ${
-                usedIds.has(t.id)
-                  ? 'border-[#0B0F14]/20 text-[#0B0F14]/30 line-through'
-                  : t.id === state.byeId
-                    ? 'border-[#F49117] bg-[#F49117]/20 text-[#73030C]'
-                    : 'border-[#73030C]/40 text-[#73030C]'
-              }`}
-            >
-              {t.name}
-            </span>
-          ))}
+          {teams.map((t) => {
+            const isHidden = hidden.has(t.id);
+            return (
+              <button
+                key={t.id}
+                onClick={() => toggleHidden(t.id)}
+                className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide border transition-all ${
+                  isHidden
+                    ? 'border-[#0B0F14]/20 text-[#0B0F14]/30 line-through'
+                    : 'border-[#73030C]/40 text-[#73030C] hover:bg-[#73030C]/10'
+                }`}
+              >
+                {isHidden ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                {t.name}
+              </button>
+            );
+          })}
         </div>
-        {state.byeId && (
-          <p className="text-[10px] text-[#0B0F14]/50 uppercase tracking-widest">
-            {teams.find((t) => t.id === state.byeId)?.name} descansó — entra primero
-          </p>
+        {hiddenIds.length > 0 && (
+          <button
+            onClick={() => setHidden([])}
+            className="text-[10px] font-bold uppercase tracking-widest text-[#F49117] hover:text-[#73030C] transition-colors"
+          >
+            Mostrar todos
+          </button>
         )}
       </div>
 
@@ -196,7 +214,24 @@ export function Roulette({ teams, matchups, onMatchup }: RouletteProps) {
           <circle cx="150" cy="150" r="140" fill="none" stroke="#73030C" strokeWidth="3" opacity="0.5" />
           <circle cx="150" cy="150" r="122" fill="none" stroke="#F49117" strokeWidth="1" opacity="0.3" />
 
-          {candidates.length === 1 ? (
+          {candidates.length === 0 ? (
+            <>
+              <circle cx="150" cy="150" r="120" fill="#F3E1CE" stroke="#73030C" strokeWidth="2" strokeDasharray="8 6" />
+              <text
+                x="150"
+                y="150"
+                textAnchor="middle"
+                dominantBaseline="central"
+                fill="#73030C"
+                fontSize="11"
+                fontWeight="900"
+                letterSpacing="1"
+                className="uppercase select-none pointer-events-none"
+              >
+                Sin equipos
+              </text>
+            </>
+          ) : candidates.length === 1 ? (
             <>
               <circle cx="150" cy="150" r="120" fill={PALETTE[0]} stroke="#F3E1CE" strokeWidth="2" opacity="0.9" />
               <text
@@ -279,6 +314,12 @@ export function Roulette({ teams, matchups, onMatchup }: RouletteProps) {
       >
         {spinning ? 'GIRANDO...' : pickA ? 'GIRAR: 2° EQUIPO' : 'GIRAR RULETA'}
       </button>
+
+      {pickA && candidates.length === 0 && (
+        <p className="text-[10px] text-[#0B0F14]/50 uppercase tracking-widest text-center">
+          No quedan equipos para el 2° — desoculta alguno
+        </p>
+      )}
 
       {/* Result */}
       {result && !spinning && (

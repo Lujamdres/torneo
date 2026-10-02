@@ -51,11 +51,6 @@ export function Matchups({ matchups, onResult, onRemove, loading }: MatchupsProp
               >
                 <div className="flex items-center justify-between gap-2 flex-wrap">
                   <div className="flex items-center gap-2 font-bold text-sm uppercase tracking-wide min-w-0">
-                    {m.round && (
-                      <span className="px-1.5 py-0.5 rounded bg-[#73030C]/10 text-[#73030C]/70 text-[10px] font-black shrink-0">
-                        R{m.round}
-                      </span>
-                    )}
                     <span className={m.winnerId === m.a.id ? 'text-[#73030C]' : 'text-[#0B0F14]'}>
                       {m.a.name}
                       {m.winnerId === m.a.id && <Crown className="inline h-3.5 w-3.5 ml-1 text-[#F49117]" />}

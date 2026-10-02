@@ -36,5 +36,4 @@ export interface Matchup {
   a: Team;
   b: Team;
   winnerId: number | null;
-  round?: number;
 }
