@@ -28,6 +28,12 @@ CREATE TABLE IF NOT EXISTS matches (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Tabla de configuración (título, logo)
+CREATE TABLE IF NOT EXISTS settings (
+  key VARCHAR(50) PRIMARY KEY,
+  value TEXT
+);
+
 -- Índices para mejorar performance
 CREATE INDEX IF NOT EXISTS idx_matches_tournament ON matches(tournament_id);
 CREATE INDEX IF NOT EXISTS idx_matches_round ON matches(round);

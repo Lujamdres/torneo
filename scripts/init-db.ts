@@ -48,6 +48,14 @@ async function initDatabase() {
     `;
     console.log('✓ Tabla matches creada');
 
+    await sql`
+      CREATE TABLE IF NOT EXISTS settings (
+        key VARCHAR(50) PRIMARY KEY,
+        value TEXT
+      )
+    `;
+    console.log('✓ Tabla settings creada');
+
     await sql`CREATE INDEX IF NOT EXISTS idx_matches_tournament ON matches(tournament_id)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_matches_round ON matches(round)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_matches_status ON matches(status)`;

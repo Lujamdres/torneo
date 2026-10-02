@@ -1,17 +1,17 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { TeamManager } from '@/components/team-manager';
 import { StandingsTable } from '@/components/standings-table';
 import { Matchups } from '@/components/matchups';
 import { PWARegister } from '@/components/pwa-register';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Trophy, WifiOff } from 'lucide-react';
+import { Trophy, WifiOff, ImagePlus, Pencil, Check, X } from 'lucide-react';
 import { Roulette } from '@/components/roulette';
 import { Team, Matchup } from '@/lib/types';
-import { getTeams, resetPoints, addPoints, isOffline } from '@/lib/store';
-import { playReset, playHack, playWin } from '@/lib/sounds';
+import { getTeams, resetPoints, addPoints, isOffline, getSettings, saveSetting } from '@/lib/store';
+import { playReset, playHack, playWin, playClick } from '@/lib/sounds';
 
 const MATCHUPS_KEY = 'utopia_matchups';
 
@@ -21,9 +21,21 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [hacked, setHacked] = useState(false);
   const [offline, setOffline] = useState(false);
+  const [title, setTitle] = useState('LIGA');
+  const [editingTitle, setEditingTitle] = useState(false);
+  const [titleDraft, setTitleDraft] = useState('LIGA');
+  const [logo, setLogo] = useState<string | null>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchTeams();
+    getSettings().then((s) => {
+      if (s.title) {
+        setTitle(s.title);
+        setTitleDraft(s.title);
+      }
+      if (s.logo) setLogo(s.logo);
+    });
     try {
       setMatchups(JSON.parse(localStorage.getItem(MATCHUPS_KEY) || '[]'));
     } catch {}
@@ -57,6 +69,42 @@ export default function Home() {
 
   const handleRemoveMatchup = (id: number) => {
     saveMatchups(matchups.filter((m) => m.id !== id));
+  };
+
+  const handleLogoFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const scale = Math.min(1, 512 / Math.max(img.width, img.height));
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext('2d')?.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const dataUrl = canvas.toDataURL('image/png');
+        setLogo(dataUrl);
+        saveSetting('logo', dataUrl);
+      };
+      img.src = reader.result as string;
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  const handleRemoveLogo = () => {
+    setLogo(null);
+    saveSetting('logo', null);
+  };
+
+  const handleSaveTitle = () => {
+    const clean = titleDraft.trim();
+    if (clean) {
+      setTitle(clean);
+      saveSetting('title', clean);
+    }
+    setEditingTitle(false);
   };
 
   const handleResetPoints = async () => {
@@ -111,6 +159,41 @@ export default function Home() {
             />
             <div className="absolute bottom-4 left-1/4 w-8 h-8 hexagon-clip bg-[#73030C]/20 animate-pulse" style={{ animationDelay: '1s' }} />
 
+            {/* Logo invitado (subible) */}
+            <input
+              ref={logoInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleLogoFile}
+              className="hidden"
+            />
+            <div className="relative inline-block mb-6 group">
+              <button
+                onClick={() => logoInputRef.current?.click()}
+                className={`relative w-24 h-24 rounded-full overflow-hidden transition-all ${
+                  logo
+                    ? 'border-2 border-[#73030C] shadow-lg shadow-[#73030C]/30'
+                    : 'border-2 border-dashed border-[#73030C]/40 hover:border-[#73030C] bg-white/40 hover:bg-white/60'
+                }`}
+                title={logo ? 'Cambiar logo' : 'Agregar logo'}
+              >
+                {logo ? (
+                  <img src={logo} alt="Logo invitado" className="w-full h-full object-cover" />
+                ) : (
+                  <ImagePlus className="h-8 w-8 mx-auto text-[#73030C]/50" />
+                )}
+              </button>
+              {logo && (
+                <button
+                  onClick={handleRemoveLogo}
+                  className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-[#73030C] text-[#F3E1CE] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  title="Quitar logo"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              )}
+            </div>
+
             {/* Logo/Título principal */}
             <div className="relative inline-block mb-6">
               <div className="absolute -inset-4 bg-gradient-to-r from-[#73030C] to-[#F49117] opacity-15 blur-2xl animate-pulse" />
@@ -120,10 +203,41 @@ export default function Home() {
               </h1>
             </div>
 
-            {/* Subtítulo */}
+            {/* Subtítulo editable */}
             <div className="relative">
-              <p className="text-2xl md:text-3xl font-bold uppercase tracking-widest mb-2">
-                <span className="text-mostaza">LIGA </span>
+              <p className="text-2xl md:text-3xl font-bold uppercase tracking-widest mb-2 flex items-center justify-center gap-2">
+                {editingTitle ? (
+                  <>
+                    <input
+                      autoFocus
+                      value={titleDraft}
+                      onChange={(e) => setTitleDraft(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleSaveTitle();
+                        if (e.key === 'Escape') { setEditingTitle(false); setTitleDraft(title); }
+                      }}
+                      className="bg-white/60 border-2 border-[#F49117] rounded px-3 py-1 text-center uppercase text-[#0B0F14] outline-none w-56"
+                      maxLength={30}
+                    />
+                    <button onClick={handleSaveTitle} className="p-1 text-[#73030C] hover:bg-[#73030C]/10 rounded" title="Guardar">
+                      <Check className="h-5 w-5" />
+                    </button>
+                    <button onClick={() => { setEditingTitle(false); setTitleDraft(title); }} className="p-1 text-[#0B0F14]/50 hover:bg-[#73030C]/10 rounded" title="Cancelar">
+                      <X className="h-5 w-5" />
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-mostaza">{title}</span>
+                    <button
+                      onClick={() => { setTitleDraft(title); setEditingTitle(true); playClick(); }}
+                      className="p-1 text-[#0B0F14]/30 hover:text-[#73030C] transition-colors"
+                      title="Editar título"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                  </>
+                )}
               </p>
               <p className="text-sm md:text-base text-[#0B0F14]/60 uppercase tracking-wider font-semibold">
                 // LIGA POR PUNTOS

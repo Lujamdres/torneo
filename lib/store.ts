@@ -89,6 +89,56 @@ export async function addPoints(id: number, delta: number): Promise<void> {
   );
 }
 
+const SETTINGS_KEY = 'utopia_settings';
+
+export interface AppSettings {
+  title?: string;
+  logo?: string | null;
+}
+
+function readLocalSettings(): AppSettings {
+  if (typeof window === 'undefined') return {};
+  try {
+    return JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
+  } catch {
+    return {};
+  }
+}
+
+function writeLocalSettings(s: AppSettings) {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
+}
+
+export async function getSettings(): Promise<AppSettings> {
+  try {
+    const res = await fetch('/api/settings');
+    if (!res.ok) throw new Error('API error');
+    const data: AppSettings = await res.json();
+    offline = false;
+    writeLocalSettings(data);
+    return data;
+  } catch {
+    offline = true;
+    return readLocalSettings();
+  }
+}
+
+export async function saveSetting(key: 'title' | 'logo', value: string | null): Promise<void> {
+  try {
+    const res = await fetch('/api/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key, value }),
+    });
+    if (!res.ok) throw new Error('API error');
+    offline = false;
+  } catch {
+    offline = true;
+  }
+  writeLocalSettings({ ...readLocalSettings(), [key]: value });
+}
+
 export async function resetPoints(): Promise<void> {
   try {
     const res = await fetch('/api/teams', {
