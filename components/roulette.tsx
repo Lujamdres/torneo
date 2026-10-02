@@ -1,28 +1,43 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { playClick } from '@/lib/sounds';
-import { Team } from '@/lib/types';
+import { Team, Matchup } from '@/lib/types';
+import { getRoundState } from '@/lib/rounds';
 
 const PALETTE = ['#73030C', '#F49117', '#0B0F14'];
 
 interface RouletteProps {
   teams: Team[];
+  matchups: Matchup[];
   onMatchup: (a: Team, b: Team) => void;
 }
 
-export function Roulette({ teams, onMatchup }: RouletteProps) {
+export function Roulette({ teams, matchups, onMatchup }: RouletteProps) {
   const [spinning, setSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [pickA, setPickA] = useState<Team | null>(null);
   const [result, setResult] = useState<string | null>(null);
-  const wheelRef = useRef<SVGSVGElement>(null);
 
-  const options = teams.map((t) => t.name);
-  const segmentAngle = options.length > 0 ? 360 / options.length : 360;
+  const state = getRoundState(teams, matchups);
+  const usedIds = new Set(state.usedIds);
+  const available = teams.filter((t) => !usedIds.has(t.id));
+
+  // Equipos elegibles para el giro actual: los que no han jugado esta ronda,
+  // priorizando los que menos enfrentamientos acumulados tienen (bye rotativo).
+  const candidates = available
+    .filter((t) => t.id !== pickA?.id)
+    .reduce<Team[]>((acc, t) => {
+      const c = state.counts[t.id] ?? 0;
+      if (acc.length === 0 || c < (state.counts[acc[0].id] ?? 0)) return [t];
+      if (c === (state.counts[acc[0].id] ?? 0)) acc.push(t);
+      return acc;
+    }, []);
+
+  const segmentAngle = candidates.length > 0 ? 360 / candidates.length : 360;
 
   const spin = () => {
-    if (spinning || teams.length < 2) return;
+    if (spinning || candidates.length === 0) return;
     playClick();
     setSpinning(true);
     setResult(null);
@@ -36,8 +51,8 @@ export function Roulette({ teams, onMatchup }: RouletteProps) {
     setTimeout(() => {
       const finalAngle = newRotation % 360;
       const pointerAngle = (360 - (finalAngle % 360)) % 360;
-      const index = Math.floor(pointerAngle / segmentAngle) % options.length;
-      const picked = teams[index];
+      const index = Math.floor(pointerAngle / segmentAngle) % candidates.length;
+      const picked = candidates[index];
 
       setSpinning(false);
 
@@ -55,9 +70,6 @@ export function Roulette({ teams, onMatchup }: RouletteProps) {
 
       if (!pickA) {
         setPickA(picked);
-      } else if (picked.id === pickA.id) {
-        setResult('¡Mismo equipo! Gira de nuevo');
-        setTimeout(() => spin(), 1200);
       } else {
         setResult(`${pickA.name} vs ${picked.name}`);
         onMatchup(pickA, picked);
@@ -114,6 +126,34 @@ export function Roulette({ teams, onMatchup }: RouletteProps) {
         // RULETA DE ENFRENTAMIENTOS
       </h3>
 
+      {/* Ronda + estado de equipos */}
+      <div className="flex flex-col items-center gap-2">
+        <span className="px-3 py-1 rounded-full bg-[#F49117]/20 border-2 border-[#F49117] text-[#73030C] text-xs font-black uppercase tracking-widest">
+          Ronda {state.round}
+        </span>
+        <div className="flex flex-wrap justify-center gap-1.5 max-w-xs">
+          {teams.map((t) => (
+            <span
+              key={t.id}
+              className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide border ${
+                usedIds.has(t.id)
+                  ? 'border-[#0B0F14]/20 text-[#0B0F14]/30 line-through'
+                  : t.id === state.byeId
+                    ? 'border-[#F49117] bg-[#F49117]/20 text-[#73030C]'
+                    : 'border-[#73030C]/40 text-[#73030C]'
+              }`}
+            >
+              {t.name}
+            </span>
+          ))}
+        </div>
+        {state.byeId && (
+          <p className="text-[10px] text-[#0B0F14]/50 uppercase tracking-widest">
+            {teams.find((t) => t.id === state.byeId)?.name} descansó — entra primero
+          </p>
+        )}
+      </div>
+
       {/* Indicador de turno */}
       <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest">
         <span className={`px-3 py-1 rounded-full border-2 ${
@@ -142,7 +182,6 @@ export function Roulette({ teams, onMatchup }: RouletteProps) {
 
         {/* Wheel */}
         <svg
-          ref={wheelRef}
           width="300"
           height="300"
           viewBox="0 0 300 300"
@@ -157,38 +196,58 @@ export function Roulette({ teams, onMatchup }: RouletteProps) {
           <circle cx="150" cy="150" r="140" fill="none" stroke="#73030C" strokeWidth="3" opacity="0.5" />
           <circle cx="150" cy="150" r="122" fill="none" stroke="#F49117" strokeWidth="1" opacity="0.3" />
 
-          {options.map((option, i) => {
-            const textPos = getTextPosition(i);
-            const midAngle = (i + 0.5) * segmentAngle - 90;
-            const color = PALETTE[i % PALETTE.length];
-            return (
-              <g key={teams[i].id}>
-                <path
-                  d={buildSegmentPath(i)}
-                  fill={color}
-                  stroke="#F3E1CE"
-                  strokeWidth="2"
-                  opacity="0.9"
-                  className="hover:opacity-100 transition-opacity"
-                />
-                <text
-                  x={textPos.x}
-                  y={textPos.y}
-                  textAnchor="middle"
-                  dominantBaseline="central"
-                  fill="white"
-                  fontSize={options.length > 6 ? 10 : 13}
-                  fontWeight="900"
-                  letterSpacing="1"
-                  transform={`rotate(${midAngle}, ${textPos.x}, ${textPos.y})`}
-                  className="uppercase select-none pointer-events-none"
-                  style={{ textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}
-                >
-                  {option.length > 12 ? option.slice(0, 11) + '…' : option}
-                </text>
-              </g>
-            );
-          })}
+          {candidates.length === 1 ? (
+            <>
+              <circle cx="150" cy="150" r="120" fill={PALETTE[0]} stroke="#F3E1CE" strokeWidth="2" opacity="0.9" />
+              <text
+                x="150"
+                y="95"
+                textAnchor="middle"
+                dominantBaseline="central"
+                fill="white"
+                fontSize="14"
+                fontWeight="900"
+                letterSpacing="1"
+                className="uppercase select-none pointer-events-none"
+                style={{ textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}
+              >
+                {candidates[0].name.length > 12 ? candidates[0].name.slice(0, 11) + '…' : candidates[0].name}
+              </text>
+            </>
+          ) : (
+            candidates.map((team, i) => {
+              const textPos = getTextPosition(i);
+              const midAngle = (i + 0.5) * segmentAngle - 90;
+              const color = PALETTE[i % PALETTE.length];
+              return (
+                <g key={team.id}>
+                  <path
+                    d={buildSegmentPath(i)}
+                    fill={color}
+                    stroke="#F3E1CE"
+                    strokeWidth="2"
+                    opacity="0.9"
+                    className="hover:opacity-100 transition-opacity"
+                  />
+                  <text
+                    x={textPos.x}
+                    y={textPos.y}
+                    textAnchor="middle"
+                    dominantBaseline="central"
+                    fill="white"
+                    fontSize={candidates.length > 6 ? 10 : 13}
+                    fontWeight="900"
+                    letterSpacing="1"
+                    transform={`rotate(${midAngle}, ${textPos.x}, ${textPos.y})`}
+                    className="uppercase select-none pointer-events-none"
+                    style={{ textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}
+                  >
+                    {team.name.length > 12 ? team.name.slice(0, 11) + '…' : team.name}
+                  </text>
+                </g>
+              );
+            })
+          )}
 
           {/* Center circle */}
           <circle cx="150" cy="150" r="25" fill="#73030C" stroke="#F49117" strokeWidth="2" />
@@ -211,9 +270,9 @@ export function Roulette({ teams, onMatchup }: RouletteProps) {
       {/* Spin button */}
       <button
         onClick={spin}
-        disabled={spinning}
+        disabled={spinning || candidates.length === 0}
         className={`px-8 py-3 font-black uppercase tracking-widest text-sm border-2 transition-all duration-300 rounded ${
-          spinning
+          spinning || candidates.length === 0
             ? 'border-[#0B0F14]/30 text-[#0B0F14]/30 cursor-not-allowed'
             : 'border-[#73030C] text-[#73030C] hover:bg-[#73030C]/10 hover:shadow-lg hover:shadow-[#73030C]/20 active:scale-95'
         }`}

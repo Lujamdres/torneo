@@ -11,6 +11,7 @@ import { Trophy, WifiOff, ImagePlus, Pencil, Check, X } from 'lucide-react';
 import { Roulette } from '@/components/roulette';
 import { Team, Matchup } from '@/lib/types';
 import { getTeams, resetPoints, addPoints, isOffline, getSettings, saveSetting } from '@/lib/store';
+import { getRoundState } from '@/lib/rounds';
 import { playReset, playHack, playWin, playClick } from '@/lib/sounds';
 
 const MATCHUPS_KEY = 'utopia_matchups';
@@ -57,7 +58,8 @@ export default function Home() {
   };
 
   const handleMatchup = (a: Team, b: Team) => {
-    saveMatchups([{ id: Date.now(), a, b, winnerId: null }, ...matchups]);
+    const { round } = getRoundState(teams, matchups);
+    saveMatchups([{ id: Date.now(), a, b, winnerId: null, round }, ...matchups]);
   };
 
   const handleMatchupResult = async (matchup: Matchup, winnerId: number) => {
@@ -321,7 +323,7 @@ export default function Home() {
               </div>
 
               <div className="border-t border-[#73030C]/20 pt-6">
-                <Roulette teams={teams} onMatchup={handleMatchup} />
+                <Roulette teams={teams} matchups={matchups} onMatchup={handleMatchup} />
               </div>
 
               <Button
