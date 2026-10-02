@@ -90,11 +90,7 @@ export function Matchups({ matchups, onResult, onRemove, loading }: MatchupsProp
                     </Button>
                   </div>
                 )}
-                {m.winnerId && (
-                  <p className="text-xs text-[#0B0F14]/50 mt-2 uppercase tracking-widest">
-                    +3 pts al ganador
-                  </p>
-                )}
+
               </div>
             ))}
           </div>

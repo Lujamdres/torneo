@@ -94,6 +94,7 @@ const SETTINGS_KEY = 'utopia_settings';
 export interface AppSettings {
   title?: string;
   logo?: string | null;
+  logo2?: string | null;
 }
 
 function readLocalSettings(): AppSettings {
@@ -124,7 +125,7 @@ export async function getSettings(): Promise<AppSettings> {
   }
 }
 
-export async function saveSetting(key: 'title' | 'logo', value: string | null): Promise<void> {
+export async function saveSetting(key: 'title' | 'logo' | 'logo2', value: string | null): Promise<void> {
   try {
     const res = await fetch('/api/settings', {
       method: 'POST',

@@ -10,10 +10,51 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Trophy, WifiOff, ImagePlus, Pencil, Check, X } from 'lucide-react';
 import { Roulette } from '@/components/roulette';
 import { Team, Matchup } from '@/lib/types';
-import { getTeams, resetPoints, addPoints, isOffline, getSettings, saveSetting } from '@/lib/store';
+import { getTeams, resetPoints, isOffline, getSettings, saveSetting } from '@/lib/store';
 import { playReset, playHack, playWin, playClick } from '@/lib/sounds';
 
 const MATCHUPS_KEY = 'utopia_matchups';
+
+function LogoSlot({
+  value,
+  onPick,
+  onClear,
+  label,
+}: {
+  value: string | null;
+  onPick: () => void;
+  onClear: () => void;
+  label: string;
+}) {
+  return (
+    <div className="relative group shrink-0">
+      <button
+        onClick={onPick}
+        className={`relative w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden transition-all ${
+          value
+            ? 'border-2 border-[#73030C] shadow-lg shadow-[#73030C]/30'
+            : 'border-2 border-dashed border-[#73030C]/40 hover:border-[#73030C] bg-white/40 hover:bg-white/60'
+        }`}
+        title={value ? `Cambiar ${label}` : `Agregar ${label}`}
+      >
+        {value ? (
+          <img src={value} alt={label} className="w-full h-full object-cover" />
+        ) : (
+          <ImagePlus className="h-8 w-8 mx-auto text-[#73030C]/50" />
+        )}
+      </button>
+      {value && (
+        <button
+          onClick={onClear}
+          className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-[#73030C] text-[#F3E1CE] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+          title={`Quitar ${label}`}
+        >
+          <X className="h-3 w-3" />
+        </button>
+      )}
+    </div>
+  );
+}
 
 export default function Home() {
   const [teams, setTeams] = useState<Team[]>([]);
@@ -25,7 +66,9 @@ export default function Home() {
   const [editingTitle, setEditingTitle] = useState(false);
   const [titleDraft, setTitleDraft] = useState('LIGA');
   const [logo, setLogo] = useState<string | null>(null);
+  const [logo2, setLogo2] = useState<string | null>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
+  const logo2InputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchTeams();
@@ -35,6 +78,7 @@ export default function Home() {
         setTitleDraft(s.title);
       }
       if (s.logo) setLogo(s.logo);
+      if (s.logo2) setLogo2(s.logo2);
     });
     try {
       setMatchups(JSON.parse(localStorage.getItem(MATCHUPS_KEY) || '[]'));
@@ -63,17 +107,16 @@ export default function Home() {
   const handleMatchupResult = async (matchup: Matchup, winnerId: number) => {
     playWin();
     saveMatchups(matchups.map((m) => (m.id === matchup.id ? { ...m, winnerId } : m)));
-    await addPoints(winnerId, 3);
-    fetchTeams();
   };
 
   const handleRemoveMatchup = (id: number) => {
     saveMatchups(matchups.filter((m) => m.id !== id));
   };
 
-  const handleLogoFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoFile = (e: React.ChangeEvent<HTMLInputElement>, key: 'logo' | 'logo2') => {
     const file = e.target.files?.[0];
     if (!file) return;
+    const setValue = key === 'logo' ? setLogo : setLogo2;
     const reader = new FileReader();
     reader.onload = () => {
       const img = new Image();
@@ -84,8 +127,8 @@ export default function Home() {
         canvas.height = Math.round(img.height * scale);
         canvas.getContext('2d')?.drawImage(img, 0, 0, canvas.width, canvas.height);
         const dataUrl = canvas.toDataURL('image/png');
-        setLogo(dataUrl);
-        saveSetting('logo', dataUrl);
+        setValue(dataUrl);
+        saveSetting(key, dataUrl);
       };
       img.src = reader.result as string;
     };
@@ -93,9 +136,9 @@ export default function Home() {
     e.target.value = '';
   };
 
-  const handleRemoveLogo = () => {
-    setLogo(null);
-    saveSetting('logo', null);
+  const handleRemoveLogo = (key: 'logo' | 'logo2') => {
+    (key === 'logo' ? setLogo : setLogo2)(null);
+    saveSetting(key, null);
   };
 
   const handleSaveTitle = () => {
@@ -159,48 +202,45 @@ export default function Home() {
             />
             <div className="absolute bottom-4 left-1/4 w-8 h-8 hexagon-clip bg-[#73030C]/20 animate-pulse" style={{ animationDelay: '1s' }} />
 
-            {/* Logo invitado (subible) */}
+            {/* Logos invitados (subibles) */}
             <input
               ref={logoInputRef}
               type="file"
               accept="image/*"
-              onChange={handleLogoFile}
+              onChange={(e) => handleLogoFile(e, 'logo')}
               className="hidden"
             />
-            <div className="relative inline-block mb-6 group">
-              <button
-                onClick={() => logoInputRef.current?.click()}
-                className={`relative w-24 h-24 rounded-full overflow-hidden transition-all ${
-                  logo
-                    ? 'border-2 border-[#73030C] shadow-lg shadow-[#73030C]/30'
-                    : 'border-2 border-dashed border-[#73030C]/40 hover:border-[#73030C] bg-white/40 hover:bg-white/60'
-                }`}
-                title={logo ? 'Cambiar logo' : 'Agregar logo'}
-              >
-                {logo ? (
-                  <img src={logo} alt="Logo invitado" className="w-full h-full object-cover" />
-                ) : (
-                  <ImagePlus className="h-8 w-8 mx-auto text-[#73030C]/50" />
-                )}
-              </button>
-              {logo && (
-                <button
-                  onClick={handleRemoveLogo}
-                  className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-[#73030C] text-[#F3E1CE] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                  title="Quitar logo"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              )}
-            </div>
+            <input
+              ref={logo2InputRef}
+              type="file"
+              accept="image/*"
+              onChange={(e) => handleLogoFile(e, 'logo2')}
+              className="hidden"
+            />
 
-            {/* Logo/Título principal */}
-            <div className="relative inline-block mb-6">
-              <div className="absolute -inset-4 bg-gradient-to-r from-[#73030C] to-[#F49117] opacity-15 blur-2xl animate-pulse" />
-              <h1 className="relative text-6xl md:text-8xl font-black uppercase tracking-wider">
-                <span className="text-vino drop-shadow-2xl">UTOPIA</span>
-                <div className="h-1 w-full bg-gradient-to-r from-[#73030C] via-[#F49117] to-[#F3E1CE] mt-2 animate-shimmer" />
-              </h1>
+            <div className="flex items-center justify-center gap-6 md:gap-12 mb-6">
+              <LogoSlot
+                value={logo}
+                onPick={() => logoInputRef.current?.click()}
+                onClear={() => handleRemoveLogo('logo')}
+                label="logo"
+              />
+
+              {/* Logo/Título principal */}
+              <div className="relative">
+                <div className="absolute -inset-4 bg-gradient-to-r from-[#73030C] to-[#F49117] opacity-15 blur-2xl animate-pulse" />
+                <h1 className="relative text-5xl md:text-7xl font-black uppercase tracking-wider">
+                  <span className="text-vino drop-shadow-2xl">UTOPIA</span>
+                  <div className="h-1 w-full bg-gradient-to-r from-[#73030C] via-[#F49117] to-[#F3E1CE] mt-2 animate-shimmer" />
+                </h1>
+              </div>
+
+              <LogoSlot
+                value={logo2}
+                onPick={() => logo2InputRef.current?.click()}
+                onClear={() => handleRemoveLogo('logo2')}
+                label="logo"
+              />
             </div>
 
             {/* Subtítulo editable */}
@@ -295,7 +335,6 @@ export default function Home() {
                   </div>
                   <div>
                     <p className="font-medium text-sm text-[#0B0F14]">Agrega equipos</p>
-                    <p className="text-xs text-[#0B0F14]/60">Equipos de 5 niños participantes</p>
                   </div>
                 </div>
 
@@ -305,7 +344,7 @@ export default function Home() {
                   </div>
                   <div>
                     <p className="font-medium text-sm text-[#0B0F14]">Sortea enfrentamientos</p>
-                    <p className="text-xs text-[#0B0F14]/60">Gira la ruleta dos veces y marca al ganador (+3 pts)</p>
+                    <p className="text-xs text-[#0B0F14]/60">Gira la ruleta dos veces y marca al ganador</p>
                   </div>
                 </div>
 
